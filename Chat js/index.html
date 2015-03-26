@@ -1,0 +1,53 @@
+<html lang="en">
+	<head>
+		<title> Chat </title>
+		<meta charset = "utf-8">
+		<link href = "bootstrap/css/bootstrap.css" rel = "stylesheet">
+		<link href = "CSS/style.css" rel = "stylesheet">
+		<link rel = "shortcut icon" href = "pictures/chat-blank-icon.png" type = "picture/png">
+
+	</head>
+
+	<body>
+		<h1 id = "chatRoom">CHATTING ROOM #1</h1>
+		<form class = "navbar-form" id = "inputForm">
+  			<input type = "text" placeholder = "Enter your name" class = "span2"></input>
+  			<button type = "submit" class = "btn btn-primary">Confirm</button>
+  	</form>
+    <div id = "mainForms" class = "container-fluid app-container main">
+  		<div class = "messages" style="float:left; width:70%;">
+  			<div class = "message">
+  				<div class = "userName">Admin</div>
+  				<div class = "text">Hello!</div>
+          <div class = "date">25.03.2015 20:34</div>
+  			</div> 
+        <div class = "message">
+          <div class = "userName">Admin</div>
+          <div class = "text">Hello!</div>
+          <div class = "date">25.03.2015 20:34</div>
+        </div>     	
+    	</div>
+    	<div class="visitors" style="float:right; width:25%;">
+    		<div class = "user">
+    			<div class = "name">Admin</div>
+    		</div>
+    	</div>
+  	</div>
+    <form id = "inputMessForm" class="form-horizontal">
+      <div class="form-group">
+        <label for="inputEmail" class="control-label col-xs-2">Type your message: </label>
+        <div class="col-xs-10">
+          <textarea id="redex"></textarea>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-xs-offset-2 col-xs-10">
+          <button type="send" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+    </form>
+  	<div class="footer text-center">
+      <small>For Exadel © 2015</small>
+    </div>
+	</body>
+</html>
