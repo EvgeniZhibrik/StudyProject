@@ -34,6 +34,7 @@ body{
 	background-color: #DDDDDD;
 	border-style: solid;
 	border-color: black;
+	border-width: 1px;
 	font-family: "Georgia" , serif;
 }
 .userName{
@@ -43,11 +44,16 @@ body{
 	border-style: solid;
 	border-color: black;
 	border-width: 1px;
+	padding-left: 10px;
+}
+.text{
+	padding-left: 10px;
 }
 .date{
 	margin-top: 1%;
 	font-size: 10px;
 	color: #444444;
+	padding-left: 10px;
 }
 
 .visitors{
@@ -61,7 +67,7 @@ body{
 .user{
 	font-family: "Georgia", serif;
 	font-size: 20px;
-	margin-left: 5%;
+	padding-left: 10px;
 }
 
 #headerMessages{

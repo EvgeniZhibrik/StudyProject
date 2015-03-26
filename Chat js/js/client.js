@@ -1,15 +1,15 @@
 var http = require('http');
 var util = require('util');
 var getIp = require('..\\getIp');
-var getName = require('..\\getName');
+//var getName = require('..\\getName');
 var ip = getIp();
 var port = 31337;
 
 var token = 0;
 var body = '';
 var period = 10000;
-var name;
-getName().then(function(ans){name = ans;get();});
+var name="user";
+//getName().then(function(ans){name = ans;get();});
 
 function get() {
 	var optionsGet = {
@@ -24,8 +24,8 @@ function get() {
 	var gett = http.request(optionsGet, function(response){
 		onDataFromServer(response,function(incoming) {
 			incomingObj = JSON.parse(incoming);
-			console.log('client token: ' + token);
-			console.log('incoming token: ' + incomingObj.token);
+			//console.log('client token: ' + token);
+			//console.log('incoming token: ' + incomingObj.token);
 			if ( token < incomingObj.token ) {
 				token = incomingObj.token;
 				incomingObj.messages.forEach(function(message) {
@@ -45,10 +45,10 @@ function get() {
 function onDataFromServer(response, incomingHandler) {
 	response.on('data', function(data) {
 		body += data;
-		console.log('data recieved: ' + data);
+		//console.log('data recieved: ' + data);
 	})
 	response.on('end', function() {
-		console.log('get finished');
+		//console.log('get finished');
 		incomingHandler(body);
 		body = '';
 		get();
@@ -126,4 +126,4 @@ process.stdin.on('readable', function(){
 
 //main.
 //starting with get request and listening for input to send or close client instatance.
-//get();
+get();
