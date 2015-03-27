@@ -5,16 +5,17 @@
 		<link href = "bootstrap/css/bootstrap.css" rel = "stylesheet">
 		<link href = "CSS/style.css" rel = "stylesheet">
 		<link rel = "shortcut icon" href = "pictures/chat-blank-icon.png" type = "picture/png">
+    <script src="js/client.js"></script>
 
 	</head>
 
-	<body>
+	<body onload = "run();">
 		<h1 id = "chatRoom">CHATTING ROOM #1</h1>
 		<form class = "navbar-form" id = "inputForm">
-  			<input type = "text" placeholder = "Enter your name" class = "span2"></input>
-  			<button type = "submit" class = "btn btn-primary">Confirm</button>
+  			<input type = "text" placeholder = "Enter your name" class = "span2" id = "setName"></input>
+  			<button class = "btn btn-primary" id = "button1">Confirm</button>
   	</form>
-    <div id = "mainForms" class = "container-fluid app-container main">
+    <div id = "mainForms" class = "container-fluid app-container main" >
   		<div class = "messages" style="float:left; width:70%;">
   			<div class = "message">
   				<div class = "userName">Admin</div>
@@ -42,7 +43,7 @@
       </div>
       <div class="form-group">
         <div class="col-xs-offset-2 col-xs-10">
-          <button type="send" class="btn btn-primary">Send</button>
+          <button type="send" class="btn btn-primary" id = "button2">Send</button>
         </div>
       </div>
     </form>

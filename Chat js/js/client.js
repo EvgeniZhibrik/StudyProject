@@ -1,15 +1,58 @@
-var http = require('http');
-var util = require('util');
-var getIp = require('..\\getIp');
+//var http = require('http');
+//var util = require('util');
+//var getIp = require('..\\getIp');
 //var getName = require('..\\getName');
-var ip = getIp();
+var ip = "";
 var port = 31337;
 
 var token = 0;
 var body = '';
 var period = 10000;
-var name="user";
+var name;
 //getName().then(function(ans){name = ans;get();});
+
+var uniqueId = function() {
+	var date = Date.now();
+	var random = Math.random() * Math.random();
+
+	return Math.floor(date * random).toString();
+};
+
+var theMessage = function(text) {
+	return {
+		name: name,
+		message: text,
+		//time: Date.now(),
+		//id: uniqueId()
+	};
+};
+
+function run(){
+	if(!name){
+		document.getElementById('inputMessForm').setAttribute("style", "visibility:hidden;");
+		document.getElementById('mainForms').style.display = "none";
+	}
+	var inputForm = document.getElementById('inputForm');
+	inputForm.addEventListener('click', delegateEvent);
+}
+
+function delegateEvent(evtObj) {
+	if(evtObj.type === 'click'
+		&& evtObj.target.id == 'button1')
+		onSetNameButtonClick();
+}
+
+function onSetNameButtonClick(){
+	var newName = document.getElementById('setName');
+	if(newName.value == '')
+		return;
+	document.getElementById('inputMessForm').setAttribute("style", "visibility:visible;");
+	document.getElementById('mainForms').style.display = "block";
+
+	
+	name = newName.value;
+	document.getElementById('chatRoom').innerHTML = name;
+} 
 
 function get() {
 	var optionsGet = {
@@ -29,8 +72,9 @@ function get() {
 			if ( token < incomingObj.token ) {
 				token = incomingObj.token;
 				incomingObj.messages.forEach(function(message) {
-					message = JSON.parse(message);
-					console.log(message.name + ': ' + message.message);
+					addMessage(message);
+					//message = JSON.parse(message);
+					//console.log(message.name + ': ' + message.message);
 				}) 	
 			}
 			
@@ -96,7 +140,7 @@ function close(){
 }
 
 
-process.stdin.setEncoding('utf8');
+/*process.stdin.setEncoding('utf8');
 var input;
 var temp;
 
@@ -120,10 +164,9 @@ process.stdin.on('readable', function(){
     }
     temp = input;
     commandHandler(input); 
-}); 
+}); */
 
 
 
 //main.
 //starting with get request and listening for input to send or close client instatance.
-get();
