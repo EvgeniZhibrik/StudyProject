@@ -1,13 +1,13 @@
-var ip = getIp();
+var ip = '192.168.2.167';
 var port = 31337;
 
 var token = 0;
 var body = '';
 var period = 10000;
 var name;
+var messageList=[];
 
-
-function getIp() {
+/*function getIp() {
     var os=require('os');
     var ifaces=os.networkInterfaces();
     
@@ -20,7 +20,7 @@ function getIp() {
             }
         }
     }
-}
+}*/
 
 
 var uniqueId = function() {
@@ -34,8 +34,8 @@ var theMessage = function(text) {
 	return {
 		name: name,
 		message: text,
-		//time: Date.now(),
-		//id: uniqueId()
+		date: Date.now(),
+		id: uniqueId()
 	};
 };
 
@@ -48,6 +48,7 @@ function run(){
 		document.getElementById('chatRoom').innerHTML = name;	
 		var inputMessForm = document.getElementById('inputMessForm');
 		inputMessForm.addEventListener('click', delegateEvent);
+		get();
 	}
 	var inputForm = document.getElementById('inputForm');
 	inputForm.addEventListener('click', delegateEvent);
@@ -73,40 +74,67 @@ function onSetNameButtonClick(){
 	
 } 
 
-function get() {
-	var optionsGet = {
- 		hostname: getIp(),
- 		port: port,
-  		path: '/',
-  		method: 'GET'
-	};
+function ajax(method, url, toReturn) {
+	var xhr = new XMLHttpRequest();
 
-	optionsGet.path = setUrl(token);
-	
-	var gett = http.request(optionsGet, function(response){
-		onDataFromServer(response,function(incoming) {
-			incomingObj = JSON.parse(incoming);
-			//console.log('client token: ' + token);
-			//console.log('incoming token: ' + incomingObj.token);
-			if ( token < incomingObj.token ) {
-				token = incomingObj.token;
-				incomingObj.messages.forEach(function(message) {
-					addMessage(message);
-					//message = JSON.parse(message);
-					//console.log(message.name + ': ' + message.message);
-				}) 	
-			}
-			
-		});
-	});
-	gett.on('error', function(e){
-		get();
-	});
-	gett.end();
+	xhr.open(method, url, true);
+
+	xhr.onload = function () {
+		if (xhr.readyState !== 4) {
+			return;
+		}
+
+		toReturn(xhr.responseText);
+	};    
+
+    xhr.ontimeout = function () {
+    	//toReturn('Server timed out !');
+    }
+
+    xhr.onerror = function (e) {
+    	var errMsg = 'Server connection error !\n'+
+    	'\n' +
+    	'Check if \n'+
+    	'- server is active\n'+
+    	'- server sends header "Access-Control-Allow-Origin:*"';
+
+        //toReturn(errMsg);
+    };
+
+    xhr.send();
 }
 
-function onDataFromServer(response, incomingHandler) {
-	response.on('data', function(data) {
+function get() {
+	var hostname = 'http://192.168.2.167:31337';
+ 	var path = setUrl(token);
+	ajax('GET',hostname+path, function(response){
+		onDataFromServer(response);
+	});
+}
+
+function createAllMessages(){
+	for(var i = 0; i < messageList.length; i++)
+	{
+		addMessage(messageList[i]);
+	}
+}
+
+function addMessage(message)
+{
+	var temp = document.createElement('div');
+	var htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
+						'<div class="userName">' + message.name + '</div>' +
+						'<div class="text">' + message.text + '</div>' +
+						'<div class="date">' + message.date + '</div>' + 
+					'</div>';
+	temp.innerHTML = htmlAsText;
+	document.getElementsByClassName("messages")[0].appendChild(temp);
+
+}
+
+
+function onDataFromServer(response) {
+	/*response.on('data', function(data) {
 		body += data;
 		//console.log('data recieved: ' + data);
 	})
@@ -120,8 +148,18 @@ function onDataFromServer(response, incomingHandler) {
 	response.on('error', function(e) {
 		console.log('error getting: ' + e.message);
 		get();
-	})
-
+	})*/
+	incomingObj = JSON.parse(response);
+			//console.log('client token: ' + token);
+			//console.log('incoming token: ' + incomingObj.token);
+	if ( token < incomingObj.token ) {
+		token = incomingObj.token;
+		incomingObj.messages.forEach(function(message) {
+			//message = JSON.parse(message);
+			messageList.push(message);
+		});
+	createAllMessages(); 	
+	}
 }
 
 function setUrl(token) {
@@ -158,34 +196,3 @@ function close(){
   process.exit(0);
 }
 
-
-/*process.stdin.setEncoding('utf8');
-var input;
-var temp;
-
-function commandHandler(input){
-
-  switch ( temp.trim() ){
-      case 'exit':
-        close();
-       break;
-
-       default:
-        if ( temp != null && temp.length > 0 )
-          send(temp);
-    }
-}
-
-process.stdin.on('readable', function(){
-    var input = process.stdin.read();
-    if ( input == null ) {
-      return;
-    }
-    temp = input;
-    commandHandler(input); 
-}); */
-
-
-
-//main.
-//starting with get request and listening for input to send or close client instatance.

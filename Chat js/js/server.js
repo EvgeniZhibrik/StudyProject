@@ -1,5 +1,9 @@
 var http = require('http');
-var history = [];
+var history = [{
+					"name":"Admin",
+					"text":"Hi!",
+					"date":"27.03.2015 19:33",
+					"id": "1234567890" }];
 var util = require('util');
 var toBeResponded = [];
 var assert = require('assert');
