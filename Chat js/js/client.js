@@ -1,15 +1,27 @@
-//var http = require('http');
-//var util = require('util');
-//var getIp = require('..\\getIp');
-//var getName = require('..\\getName');
-var ip = "";
+var ip = getIp();
 var port = 31337;
 
 var token = 0;
 var body = '';
 var period = 10000;
 var name;
-//getName().then(function(ans){name = ans;get();});
+
+
+function getIp() {
+    var os=require('os');
+    var ifaces=os.networkInterfaces();
+    
+    for (var dev in ifaces) {
+        for(var i in ifaces[dev]) {
+            var details = ifaces[dev][i];
+    
+            if (details.family=='IPv4' && !details.internal) {
+                return details.address;
+            }
+        }
+    }
+}
+
 
 var uniqueId = function() {
 	var date = Date.now();
@@ -32,14 +44,21 @@ function run(){
 		document.getElementById('inputMessForm').setAttribute("style", "visibility:hidden;");
 		document.getElementById('mainForms').style.display = "none";
 	}
+	else{
+		document.getElementById('chatRoom').innerHTML = name;	
+		var inputMessForm = document.getElementById('inputMessForm');
+		inputMessForm.addEventListener('click', delegateEvent);
+	}
 	var inputForm = document.getElementById('inputForm');
 	inputForm.addEventListener('click', delegateEvent);
+	
 }
 
 function delegateEvent(evtObj) {
 	if(evtObj.type === 'click'
 		&& evtObj.target.id == 'button1')
 		onSetNameButtonClick();
+
 }
 
 function onSetNameButtonClick(){
@@ -51,7 +70,7 @@ function onSetNameButtonClick(){
 
 	
 	name = newName.value;
-	document.getElementById('chatRoom').innerHTML = name;
+	
 } 
 
 function get() {
