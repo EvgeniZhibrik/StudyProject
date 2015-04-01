@@ -1,27 +1,20 @@
-var ip = '192.168.1.5';
-var port = 31337;
+'use strict';
 
-var token = 0;
-var body = '';
-var period = 10000;
-var name;
-var messageList=[];
+var AppState = restore() || {
+	mainUrl: 'http://192.168.2.167:31337',
+	messageList: [],
+	name: "anon",
+	token: 0,
+	firstUse: true
+};
 
-/*function getIp() {
-    var os=require('os');
-    var ifaces=os.networkInterfaces();
-    
-    for (var dev in ifaces) {
-        for(var i in ifaces[dev]) {
-            var details = ifaces[dev][i];
-    
-            if (details.family=='IPv4' && !details.internal) {
-                return details.address;
-            }
-        }
-    }
-}*/
+function store(item){
+	localStorage.setItem("AppState", JSON.stringify(item));
+}
 
+function restore(){
+	return JSON.parse(localStorage.getItem("AppState"));
+}
 
 var uniqueId = function() {
 	var date = Date.now();
@@ -30,35 +23,46 @@ var uniqueId = function() {
 	return Math.floor(date * random).toString();
 };
 
+var getDate = function(){
+	var date = new Date();
+	return date.toUTCString();
+}
+
+
 var theMessage = function(text) {
 	return {
-		name: name,
-		message: text,
-		date: Date.now(),
+		name: AppState.name,
+		text: text,
+		date: getDate(),
 		id: uniqueId()
 	};
 };
 
 function run(){
-	if(!name){
-		document.getElementById('inputMessForm').setAttribute("style", "visibility:hidden;");
-		document.getElementById('mainForms').style.display = "none";
-	}
-	else{
-		document.getElementById('chatRoom').innerHTML = name;	
-		var inputMessForm = document.getElementById('inputMessForm');
-		inputMessForm.addEventListener('click', delegateEvent);
-		get();
-	}
+	var inputMessForm = document.getElementById('inputMessForm');
+	inputMessForm.addEventListener('click', delegateEvent);
 	var inputForm = document.getElementById('inputForm');
 	inputForm.addEventListener('click', delegateEvent);
+	displayPage();
+}
+
+function displayPage(){
+	if(AppState.firstUse){
+		document.getElementById('inputMessForm').setAttribute("style", "visibility:hidden;");
+		document.getElementById('mainForms').style.display = "none";
+		//document.getElementById('chatRoom').innerHTML = AppState.name;
+	}
+	else {
+		get();
+		createAllMessages();
+	}
 }
 
 function delegateEvent(evtObj) {
 	if(evtObj.type === 'click'
 		&& evtObj.target.id == 'button1')
 		onSetNameButtonClick();
-	if(evtObj.type === 'click'
+	else if(evtObj.type === 'click'
 		&& evtObj.target.id == 'button2')
 		onSendMessButtonClick();
 }
@@ -67,14 +71,13 @@ function onSetNameButtonClick(){
 	var newName = document.getElementById('setName');
 	if(newName.value == '')
 		return;
-	document.getElementById('inputMessForm').setAttribute("style", "visibility:visible;");
-	document.getElementById('mainForms').style.display = "block";
-
-	
-	name = newName.value;
+	AppState.name = newName.value;
+	AppState.firstUse =false;
+	store(AppState);
+	get();
 } 
 
-function ajax(method, url, toReturn) {
+function ajax(method, url, data, toReturn) {
 	var xhr = new XMLHttpRequest();
 
 	xhr.open(method, url, true);
@@ -101,21 +104,25 @@ function ajax(method, url, toReturn) {
         //toReturn(errMsg);
     };
 
-    xhr.send();
+    xhr.send(data);
 }
 
 function get() {
-	var hostname = 'http://192.168.1.5:31337';
- 	var path = setUrl(token);
-	ajax('GET',hostname+path, function(response){
+	var path = setUrl(AppState.token);
+	ajax('GET',AppState.mainUrl+path, null, function(response){
 		onDataFromServer(response.responseText);
 	});
 }
 
 function createAllMessages(){
-	for(var i = 0; i < messageList.length; i++)
+	var messages = document.getElementsByClassName("messages")[0];
+	var t = messages.children.length;
+	for(var j = 0; j< t; j++){
+		messages.removeChild(messages.children[0]);
+	}
+	for(var i = 0; i < AppState.messageList.length; i++)
 	{
-		addMessage(messageList[i]);
+		addMessage(AppState.messageList[i]);
 	}
 }
 
@@ -133,31 +140,17 @@ function addMessage(message) {
 
 
 function onDataFromServer(response) {
-	/*response.on('data', function(data) {
-		body += data;
-		//console.log('data recieved: ' + data);
-	})
-	response.on('end', function() {
-		//console.log('get finished');
-		incomingHandler(body);
-		body = '';
-		get();
-		
-	})
-	response.on('error', function(e) {
-		console.log('error getting: ' + e.message);
-		get();
-	})*/
-	incomingObj = JSON.parse(response);
+	var incomingObj = JSON.parse(response);
 			//console.log('client token: ' + token);
 			//console.log('incoming token: ' + incomingObj.token);
-	if ( token < incomingObj.token ) {
-		token = incomingObj.token;
+	if ( AppState.token < incomingObj.token ) {
+		AppState.token = incomingObj.token;
 		incomingObj.messages.forEach(function(message) {
 			//message = JSON.parse(message);
-			messageList.push(message);
+			AppState.messageList.push(message);
 		});
-	createAllMessages(); 	
+		store(AppState);
+		displayPage();
 	}
 }
 
@@ -165,44 +158,32 @@ function setUrl(token) {
 	return '/?token=' + token;
 }
 
-function send( line ){
-
-	var optionsPost = {
-    	hostname: ip,
-    	method: 'POST',
-    	port: port,
-    	agent: false
-  	};
-
-  var req = http.request(optionsPost, function(response) {
-      if(response.statusCode != 200) {
-        console.log('Bad request. error: ' + response.statusCode);
-        return;
-      }
-  });
-
-  req.on('error', function(e) {
-        console.log('Server shotdown.');
-  });
-
-  req.write(JSON.stringify(('{ "name": "' + name.trim() + '", "message": "' + line.trim() + '"}')));
-  token++;
-  req.end();
-}
-
 function onSendMessButtonClick(){
 	var newText = document.getElementById('redex');
 	if(newText.value == '')
 		return;
 	var newMess = theMessage(newText.value);
-	var hostname = 'http://192.168.1.5:31337';
-	ajax('POST', hostname, function(response){
+	var data = JSON.stringify(newMess);
+	ajax('POST', AppState.mainUrl, data,function(response){
 		if(response.status != 200){
 			return;
 		}
+		onDataFromServer(response.responseText);
+		get();
 	});
 }
 
 function close(){
   process.exit(0);
 }
+
+function end(){
+	localStorage.clear();
+}
+
+/*function f(){
+	
+	setTimeout(function (){f();get();}, 10000);
+}
+
+f();*/
