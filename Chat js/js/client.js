@@ -1,4 +1,4 @@
-var ip = '192.168.2.167';
+var ip = '192.168.1.5';
 var port = 31337;
 
 var token = 0;
@@ -52,14 +52,15 @@ function run(){
 	}
 	var inputForm = document.getElementById('inputForm');
 	inputForm.addEventListener('click', delegateEvent);
-	
 }
 
 function delegateEvent(evtObj) {
 	if(evtObj.type === 'click'
 		&& evtObj.target.id == 'button1')
 		onSetNameButtonClick();
-
+	if(evtObj.type === 'click'
+		&& evtObj.target.id == 'button2')
+		onSendMessButtonClick();
 }
 
 function onSetNameButtonClick(){
@@ -71,7 +72,6 @@ function onSetNameButtonClick(){
 
 	
 	name = newName.value;
-	
 } 
 
 function ajax(method, url, toReturn) {
@@ -84,7 +84,7 @@ function ajax(method, url, toReturn) {
 			return;
 		}
 
-		toReturn(xhr.responseText);
+		toReturn(xhr);
 	};    
 
     xhr.ontimeout = function () {
@@ -105,10 +105,10 @@ function ajax(method, url, toReturn) {
 }
 
 function get() {
-	var hostname = 'http://192.168.2.167:31337';
+	var hostname = 'http://192.168.1.5:31337';
  	var path = setUrl(token);
 	ajax('GET',hostname+path, function(response){
-		onDataFromServer(response);
+		onDataFromServer(response.responseText);
 	});
 }
 
@@ -119,8 +119,7 @@ function createAllMessages(){
 	}
 }
 
-function addMessage(message)
-{
+function addMessage(message) {
 	var temp = document.createElement('div');
 	var htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
 						'<div class="userName">' + message.name + '</div>' +
@@ -191,8 +190,19 @@ function send( line ){
   req.end();
 }
 
+function onSendMessButtonClick(){
+	var newText = document.getElementById('redex');
+	if(newText.value == '')
+		return;
+	var newMess = theMessage(newText.value);
+	var hostname = 'http://192.168.1.5:31337';
+	ajax('POST', hostname, function(response){
+		if(response.status != 200){
+			return;
+		}
+	});
+}
 
 function close(){
   process.exit(0);
 }
-
