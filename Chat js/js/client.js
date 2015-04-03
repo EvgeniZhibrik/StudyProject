@@ -5,7 +5,9 @@ var AppState = restore() || {
 	messageList: [],
 	name: "anon",
 	token: 0,
-	firstUse: true
+	firstUse: true,
+	editMode: false,
+	editMess: null
 };
 
 function store(item){
@@ -43,6 +45,8 @@ function run(){
 	inputMessForm.addEventListener('click', delegateEvent);
 	var inputForm = document.getElementById('inputForm');
 	inputForm.addEventListener('click', delegateEvent);
+	var messList = document.getElementsByClassName('messages')[0];
+	messList.addEventListener('click', delegateEvent);
 	displayPage();
 }
 
@@ -55,6 +59,20 @@ function displayPage(){
 	else {
 		get();
 		createAllMessages();
+		if(AppState.editMode){
+			var inputMessFormButtons = document.getElementsByClassName("form-group")[1];
+			var temp = document.createElement('div');
+			temp.innerHTML =  '<div class="col-xs-offset-2 col-xs-10"><button type="send" class="btn btn-primary" id = "button3">Cancel</button></div>';
+			inputMessFormButtons.appendChild(temp);
+			document.getElementById('button2').textContent = "Edit";
+			var inputMessFormText = document.getElementById("redex");
+			var allMessages = document.getElementsByClassName("message");
+			for (var i = 0; i < allMessages.length; i++)
+				if(allMessages[i].attributes['data-task-id'].value == AppState.editMess){
+					inputMessFormText.value = allMessages[i].children[1].innerHTML;
+					break;
+				}
+		}
 	}
 }
 
@@ -65,6 +83,10 @@ function delegateEvent(evtObj) {
 	else if(evtObj.type === 'click'
 		&& evtObj.target.id == 'button2')
 		onSendMessButtonClick();
+	else if(evtObj.type === 'click'
+		&& evtObj.target.parentNode.className == 'message'
+		&& evtObj.target.parentNode.getElementsByClassName('userName')[0].innerHTML == AppState.name)
+		onEditMessButtonClick(evtObj.target.parentNode.attributes['data-task-id'].value);
 }
 
 function onSetNameButtonClick(){
@@ -76,6 +98,13 @@ function onSetNameButtonClick(){
 	store(AppState);
 	get();
 } 
+
+function onEditMessButtonClick(messId){
+	AppState.editMode = true;
+	AppState.editMess = messId;
+	store(AppState);
+	displayPage();
+}
 
 function ajax(method, url, data, toReturn) {
 	var xhr = new XMLHttpRequest();
@@ -181,9 +210,3 @@ function end(){
 	localStorage.clear();
 }
 
-/*function f(){
-	
-	setTimeout(function (){f();get();}, 10000);
-}
-
-f();*/
