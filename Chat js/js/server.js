@@ -3,7 +3,9 @@ var history = [{
 					"name":"Admin",
 					"text":"Hi!",
 					"date":"27.03.2015 19:33",
-					"id": "1234567890" }];
+					"id": "1234567890",
+					"edited": false 
+				}];
 var util = require('util');
 var toBeResponded = [];
 var assert = require('assert');
@@ -39,27 +41,44 @@ function getHandler(req, res) {
 
 	if(token < history.length) {
 		var messages = history.slice(token, history.length);
-		responseWith(res, 200, history.length, messages);
+		responseWith(res, 200, history.length, history);
 		return;
 	}
 
 	console.log('waiter added.token: ' + token + ' history size: ' + history.length);
 	toBeResponded.push({res: res, token: token});
+	responseWith(res,200,history.length,history);
 	
 }
 
 function postHandler(req, res) {
 	console.log('posthandler started');
 	onDataComplete(req, function(message){
-		history.push(message);
-		console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
-		toBeResponded.forEach(function(waiter){
-			var token = waiter.token;
-			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
-			responseWith(waiter.res, 200, history.length, history.slice(token, history.length) );
-			console.log(history.slice(token, history.length));
-			waiter.res.end();
-		});
+		if(!message.edited){
+			history.push(message);
+			console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
+			toBeResponded.forEach(function(waiter){
+				var token = waiter.token;
+				console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
+				responseWith(waiter.res, 200, history.length, history);
+				console.log(history.slice(token, history.length));
+				waiter.res.end();
+			});
+		}
+		else {
+			for (var i = 0; i < history.length; i++)
+			{
+				if(history[i].id == message.id)
+					history[i] = message;
+			}
+			console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
+			toBeResponded.forEach(function(waiter){
+				var token = waiter.token;
+				console.log('responding waiter. token: ' + '-1' + ' history size: ' + history.length);
+				responseWith(waiter.res, 200, history.length, history);
+				waiter.res.end();
+			});
+		}
 		toBeResponded = [];
 		res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
 		res.end();

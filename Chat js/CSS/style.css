@@ -30,6 +30,7 @@ body{
 	height: 100%;
 	border-style: solid;
 	border-color: black;
+	overflow: scroll;
 }
 .message{
 	background-color: #DDDDDD;

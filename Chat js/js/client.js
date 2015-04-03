@@ -31,12 +31,13 @@ var getDate = function(){
 }
 
 
-var theMessage = function(text) {
+var theMessage = function(text, id) {
 	return {
 		name: AppState.name,
 		text: text,
 		date: getDate(),
-		id: uniqueId()
+		id: id,
+		edited: AppState.editMode
 	};
 };
 
@@ -47,6 +48,7 @@ function run(){
 	inputForm.addEventListener('click', delegateEvent);
 	var messList = document.getElementsByClassName('messages')[0];
 	messList.addEventListener('click', delegateEvent);
+	get();
 	displayPage();
 }
 
@@ -57,7 +59,6 @@ function displayPage(){
 		//document.getElementById('chatRoom').innerHTML = AppState.name;
 	}
 	else {
-		get();
 		createAllMessages();
 		if(AppState.editMode){
 			var inputMessFormButtons = document.getElementsByClassName("form-group")[1];
@@ -72,6 +73,14 @@ function displayPage(){
 					inputMessFormText.value = allMessages[i].children[1].innerHTML;
 					break;
 				}
+		}
+		else{
+			var inputMessFormButtons = document.getElementsByClassName("form-group")[1];
+			if(document.getElementsByClassName('col-xs-offset-2 col-xs-10')[1])
+				inputMessFormButtons.removeChild(inputMessFormButtons.children[1]);
+			document.getElementById('button2').textContent = "Send";
+			var inputMessFormText = document.getElementById("redex");
+			inputMessFormText.value = '';
 		}
 	}
 }
@@ -96,7 +105,6 @@ function onSetNameButtonClick(){
 	AppState.name = newName.value;
 	AppState.firstUse =false;
 	store(AppState);
-	get();
 } 
 
 function onEditMessButtonClick(messId){
@@ -157,11 +165,21 @@ function createAllMessages(){
 
 function addMessage(message) {
 	var temp = document.createElement('div');
-	var htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
+	var htmlAsText;
+	if(!message.edited){
+		htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
 						'<div class="userName">' + message.name + '</div>' +
 						'<div class="text">' + message.text + '</div>' +
-						'<div class="date">' + message.date + '</div>' + 
+						'<div class="date">sended: ' + message.date + '</div>' + 
 					'</div>';
+	}
+	else {
+		htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
+						'<div class="userName">' + message.name + '</div>' +
+						'<div class="text">' + message.text + '</div>' +
+						'<div class="date">edited: ' + message.date + '</div>' + 
+					'</div>';
+	}
 	temp.innerHTML = htmlAsText;
 	document.getElementsByClassName("messages")[0].appendChild(temp);
 
@@ -172,15 +190,17 @@ function onDataFromServer(response) {
 	var incomingObj = JSON.parse(response);
 			//console.log('client token: ' + token);
 			//console.log('incoming token: ' + incomingObj.token);
-	if ( AppState.token < incomingObj.token ) {
-		AppState.token = incomingObj.token;
+		
+		AppState.messageList = [];
 		incomingObj.messages.forEach(function(message) {
 			//message = JSON.parse(message);
 			AppState.messageList.push(message);
 		});
+		AppState.token = AppState.messageList.length;
+		AppState.editMode = false;
+		AppState.editMess = '';
 		store(AppState);
 		displayPage();
-	}
 }
 
 function setUrl(token) {
@@ -189,15 +209,21 @@ function setUrl(token) {
 
 function onSendMessButtonClick(){
 	var newText = document.getElementById('redex');
-	if(newText.value == '')
+	var newMess;
+	if(!AppState.editMode){
+		if(newText.value == '')
 		return;
-	var newMess = theMessage(newText.value);
+		newMess = theMessage(newText.value, uniqueId());
+	}
+	else{
+		newMess = theMessage(newText.value, AppState.editMess);
+	}
 	var data = JSON.stringify(newMess);
 	ajax('POST', AppState.mainUrl, data,function(response){
-		if(response.status != 200){
+		/*if(response.status != 200){
 			return;
-		}
-		onDataFromServer(response.responseText);
+		}*/
+		//onDataFromServer(response.responseText);
 		get();
 	});
 }
