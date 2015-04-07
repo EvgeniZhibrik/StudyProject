@@ -98,6 +98,7 @@ function displayPage(){
 			inputMessFormText.value = '';
 		}
 	}
+	get();
 }
 
 function delegateEvent(evtObj) {
@@ -107,6 +108,9 @@ function delegateEvent(evtObj) {
 	else if(evtObj.type === 'click'
 		&& evtObj.target.id == 'button2')
 		onSendMessButtonClick();
+	else if(evtObj.type === 'click'
+		&& evtObj.target.id == 'button3')
+		onCancelEditButtonClick();
 	else if(evtObj.type === 'click'
 		&& evtObj.target.parentNode.className == 'message'
 		&& evtObj.target.parentNode.getElementsByClassName('userName')[0].innerHTML == AppState.name)
@@ -121,6 +125,12 @@ function onSetNameButtonClick(){
 	AppState.firstUse =false;
 	store(AppState);
 } 
+
+function onCancelEditButtonClick(){
+	AppState.editMode = false;
+	AppState.editMess = '';
+	displayPage();
+}
 
 function onEditMessButtonClick(messId){
 	AppState.editMode = true;
@@ -176,6 +186,7 @@ function createAllMessages(){
 	{
 		addMessage(AppState.messageList[i]);
 	}
+	messages.scrollTop = 9999;
 }
 
 function addMessage(message) {
@@ -205,7 +216,7 @@ function onDataFromServer(response) {
 	var incomingObj = JSON.parse(response);
 			//console.log('client token: ' + token);
 			//console.log('incoming token: ' + incomingObj.token);
-	while(incomingObj.token - AppState.token > incomingObj.messages.length)	
+	while(incomingObj.token - AppState.messageList.length < incomingObj.messages.length)	
 		AppState.messageList.pop();
 	incomingObj.messages.forEach(function(message) {
 		AppState.messageList.push(message);

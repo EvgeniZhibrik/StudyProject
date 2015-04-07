@@ -89,6 +89,7 @@ function putHandler(req, res){
 			}
 		console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
 		toBeResponded.forEach(function(waiter){
+			var token = waiter.token;
 			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
 			responseWith(waiter.res, 200, history.length, history.slice(i,history.length));
 			console.log(history.slice(i, history.length));
@@ -101,8 +102,7 @@ function putHandler(req, res){
 }
 
 function responseWith(response, statusCode, token, messages){
-	response.writeHeader(statusCode, {'Access-Control-Allow-Origin':'*',
-										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
+	response.writeHeader(statusCode, {'Access-Control-Allow-Origin':'*'});
 	if ( messages != null ) {
 	
 		response.write(JSON.stringify({
@@ -126,12 +126,10 @@ function onDataComplete(req, handler) {
 	var message = '';
 	console.log('hello');
 	req.on('data', function(data){
-		console.log(data);
 		message += data.toString();
 	});
 
 	req.on('end', function(){
-		console.log(message);
 		handler(JSON.parse(message));
 	});
 }
