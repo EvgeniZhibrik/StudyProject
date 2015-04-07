@@ -1,13 +1,13 @@
 'use strict';
 
-var AppState = restore() || {
-	mainUrl: 'http://192.168.2.167:31337',
-	messageList: [],
-	name: "anon",
+var AppState = {
+	mainUrl: 'http://192.168.1.7:31337',
 	token: 0,
 	firstUse: true,
+	messageList: [],
 	editMode: false,
-	editMess: null
+	editMess: '',
+	name: ''
 };
 
 function store(item){
@@ -15,7 +15,21 @@ function store(item){
 }
 
 function restore(){
-	return JSON.parse(localStorage.getItem("AppState"));
+	ajax('GET', AppState.mainUrl + setUrl(AppState.token), null, function(response){
+		var incomingObj = JSON.parse(response.responseText);
+		incomingObj.messages.forEach(function(message) {
+			AppState.messageList.push(message);
+		});
+		AppState.token = AppState.messageList.length;
+		var temp2 = JSON.parse(localStorage.getItem("AppState"));
+		if (temp2){
+			AppState.firstUse = temp2.firstUse;
+			AppState.editMode = temp2.editMode;
+			AppState.editMess = temp2.editMess;
+			AppState.name = temp2.name;
+		}
+		displayPage();
+	}); 
 }
 
 var uniqueId = function() {
@@ -48,17 +62,18 @@ function run(){
 	inputForm.addEventListener('click', delegateEvent);
 	var messList = document.getElementsByClassName('messages')[0];
 	messList.addEventListener('click', delegateEvent);
-	get();
-	displayPage();
+	restore();
 }
 
 function displayPage(){
 	if(AppState.firstUse){
 		document.getElementById('inputMessForm').setAttribute("style", "visibility:hidden;");
 		document.getElementById('mainForms').style.display = "none";
-		//document.getElementById('chatRoom').innerHTML = AppState.name;
 	}
 	else {
+		var s = document.getElementById('chatRoom').innerHTML;
+		if(s == 'CHATTING ROOM #1')
+			document.getElementById('chatRoom').innerHTML = AppState.name + ' in ' + s;
 		createAllMessages();
 		if(AppState.editMode){
 			var inputMessFormButtons = document.getElementsByClassName("form-group")[1];
@@ -190,17 +205,14 @@ function onDataFromServer(response) {
 	var incomingObj = JSON.parse(response);
 			//console.log('client token: ' + token);
 			//console.log('incoming token: ' + incomingObj.token);
-		
-		AppState.messageList = [];
-		incomingObj.messages.forEach(function(message) {
-			//message = JSON.parse(message);
-			AppState.messageList.push(message);
-		});
-		AppState.token = AppState.messageList.length;
-		AppState.editMode = false;
-		AppState.editMess = '';
-		store(AppState);
-		displayPage();
+	while(incomingObj.token - AppState.token > incomingObj.messages.length)	
+		AppState.messageList.pop();
+	incomingObj.messages.forEach(function(message) {
+		AppState.messageList.push(message);
+	});
+	AppState.token = AppState.messageList.length;
+	store(AppState);
+	displayPage();
 }
 
 function setUrl(token) {
@@ -214,18 +226,23 @@ function onSendMessButtonClick(){
 		if(newText.value == '')
 		return;
 		newMess = theMessage(newText.value, uniqueId());
+		var data = JSON.stringify(newMess);
+		ajax('POST', AppState.mainUrl, data,function(response){
+			get();
+		});
 	}
 	else{
 		newMess = theMessage(newText.value, AppState.editMess);
+		var data = JSON.stringify(newMess);
+		AppState.editMode = false;
+		AppState.editMess = '';
+		store(AppState);
+		ajax('PUT', AppState.mainUrl + '/?id=' + newMess.id, data, function(response){
+			get();
+		});
 	}
-	var data = JSON.stringify(newMess);
-	ajax('POST', AppState.mainUrl, data,function(response){
-		/*if(response.status != 200){
-			return;
-		}*/
-		//onDataFromServer(response.responseText);
-		get();
-	});
+	
+	
 }
 
 function close(){

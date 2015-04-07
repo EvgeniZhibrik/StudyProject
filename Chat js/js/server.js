@@ -21,10 +21,21 @@ var server = http.createServer(function (req, res) {
 		console.log('method: ' + req.method);
 		return;
 	}
-	if(req.method == 'POST'){
+	else if(req.method == 'POST'){
 		postHandler(req, res);
 		console.log('method: ' + req.method);
 		return;
+	}
+	else if(req.method == 'PUT'){
+		putHandler(req, res);
+		console.log('method: ' + req.method);
+		return;
+	}
+	else
+	{
+		res.writeHeader(200, {'Access-Control-Allow-Origin':'*',
+										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
+		res.end();
 	}
 });
 
@@ -41,52 +52,57 @@ function getHandler(req, res) {
 
 	if(token < history.length) {
 		var messages = history.slice(token, history.length);
-		responseWith(res, 200, history.length, history);
+		responseWith(res, 200, history.length, messages);
 		return;
 	}
 
 	console.log('waiter added.token: ' + token + ' history size: ' + history.length);
 	toBeResponded.push({res: res, token: token});
-	responseWith(res,200,history.length,history);
-	
 }
 
 function postHandler(req, res) {
 	console.log('posthandler started');
 	onDataComplete(req, function(message){
-		if(!message.edited){
-			history.push(message);
-			console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
-			toBeResponded.forEach(function(waiter){
-				var token = waiter.token;
-				console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
-				responseWith(waiter.res, 200, history.length, history);
-				console.log(history.slice(token, history.length));
-				waiter.res.end();
-			});
-		}
-		else {
-			for (var i = 0; i < history.length; i++)
-			{
-				if(history[i].id == message.id)
-					history[i] = message;
-			}
-			console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
-			toBeResponded.forEach(function(waiter){
-				var token = waiter.token;
-				console.log('responding waiter. token: ' + '-1' + ' history size: ' + history.length);
-				responseWith(waiter.res, 200, history.length, history);
-				waiter.res.end();
-			});
-		}
+		history.push(message);
+		console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
+		toBeResponded.forEach(function(waiter){
+			var token = waiter.token;
+			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
+			responseWith(waiter.res, 200, history.length, history.slice(token,history.length));
+			console.log(history.slice(token, history.length));
+			waiter.res.end();
+		});
 		toBeResponded = [];
 		res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
 		res.end();
 	});
 }
 
+function putHandler(req, res){
+	console.log('puthandler started');
+	onDataComplete(req, function(message){
+		var i;
+		for(i = 0; i < history.length; i++)
+			if(history[i].id == message.id){
+				history[i] = message;
+				break;
+			}
+		console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
+		toBeResponded.forEach(function(waiter){
+			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
+			responseWith(waiter.res, 200, history.length, history.slice(i,history.length));
+			console.log(history.slice(i, history.length));
+			waiter.res.end();
+		});
+		res.writeHeader(200, {'Access-Control-Allow-Origin':'*',
+								"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
+		res.end();
+	});
+}
+
 function responseWith(response, statusCode, token, messages){
-	response.writeHeader(statusCode, {'Access-Control-Allow-Origin':'*'});
+	response.writeHeader(statusCode, {'Access-Control-Allow-Origin':'*',
+										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
 	if ( messages != null ) {
 	
 		response.write(JSON.stringify({
@@ -108,11 +124,14 @@ function getToken(u) {
 
 function onDataComplete(req, handler) {
 	var message = '';
+	console.log('hello');
 	req.on('data', function(data){
+		console.log(data);
 		message += data.toString();
 	});
 
 	req.on('end', function(){
+		console.log(message);
 		handler(JSON.parse(message));
 	});
 }
