@@ -1,12 +1,11 @@
 var http = require('http');
 var history = [{
-					"name":"Admin",
-					"text":"Hi!",
-					"date":"27.03.2015 19:33",
-					"id": "1234567890",
-					"edited": false,
-					"deleted": false
-				}];
+				method: 'POST',
+				text: 'Hi!',
+				date: 'Wed, 08 Apr 2015 13:43:10 GMT',
+				id: '111',
+				name: 'Admin'
+}];
 var util = require('util');
 var toBeResponded = [];
 var assert = require('assert');
@@ -15,6 +14,11 @@ var getIp = require('..\\getIp');
 
 var ip = getIp();
 var port = 31337;
+
+var getDate = function(){
+	var date = new Date();
+	return date.toUTCString();
+}
 
 var server = http.createServer(function (req, res) {
 	if(req.method == 'GET'){
@@ -42,6 +46,8 @@ var server = http.createServer(function (req, res) {
 		res.writeHeader(200, {'Access-Control-Allow-Origin':'*',
 										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
 		res.end();
+		console.log('method: ' + req.method);
+		return;
 	}
 });
 
@@ -50,15 +56,15 @@ function getHandler(req, res) {
 	var token = getToken(req.url);
 	console.log('token: ' + token);
 	console.log('history size: ' + history.length);
-
 	if(token > history.length) {
 		responseWith(res, 401, token, null);
 		return;
 	}
-
 	if(token < history.length) {
-		var messages = history.slice(token, history.length);
-		responseWith(res, 200, history.length, messages);
+		var clientMess = getMessages(token);
+		var serverMess = getMessages(history.length);
+		var respData = delta(clientMess, serverMess);
+		responseWith(res, 200, history.length, respData);
 		return;
 	}
 
@@ -74,8 +80,11 @@ function postHandler(req, res) {
 		toBeResponded.forEach(function(waiter){
 			var token = waiter.token;
 			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
-			responseWith(waiter.res, 200, history.length, history.slice(token,history.length));
-			console.log(history.slice(token, history.length));
+			var clientMess = getMessages(token);
+			var serverMess = getMessages(history.length);
+			var respData = delta(clientMess, serverMess);
+			responseWith(waiter.res, 200, history.length, respData);
+			console.log(respData);
 			waiter.res.end();
 		});
 		toBeResponded = [];
@@ -87,18 +96,16 @@ function postHandler(req, res) {
 function putHandler(req, res){
 	console.log('puthandler started');
 	onDataComplete(req, function(message){
-		var i;
-		for(i = 0; i < history.length; i++)
-			if(history[i].id == message.id){
-				history[i] = message;
-				break;
-			}
+		history.push(message);
 		console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
+		var serverMess = getMessages(history.length);
 		toBeResponded.forEach(function(waiter){
 			var token = waiter.token;
 			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
-			responseWith(waiter.res, 200, history.length, history.slice(i,history.length));
-			console.log(history.slice(i, history.length));
+			var clientMess = getMessages(token);
+			var respData = delta(clientMess, serverMess);
+			responseWith(waiter.res, 200, history.length, respData);
+			console.log(respData);
 			waiter.res.end();
 		});
 		toBeResponded = [];
@@ -112,24 +119,23 @@ function deleteHandler(req,res){
 	var id = getId(req.url);
 	console.log('id: ' + id);
 	var i;
-	for(i = 0; i < history.length; i++){
-		if(history[i].id == id){
-			history[i].deleted = true;
-		 	console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
-		 	toBeResponded.forEach(function(waiter){
-				var token = waiter.token;
-				console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
-				responseWith(waiter.res, 200, history.length, history.slice(i,history.length));
-				console.log(history.slice(i, history.length));
-				waiter.res.end();
-			});
-			toBeResponded = [];
-			res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
-			res.end();
-			return;
-		}
-	}
-	res.writeHeader(204, {'Access-Control-Allow-Origin':'*'});
+	history.push({
+		method: 'DELETE',
+		id: id,
+		date: getDate()
+	});
+	var serverMess = getMessages(history.length);
+	toBeResponded.forEach(function(waiter){
+			var token = waiter.token;
+			console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
+			var clientMess = getMessages(token);
+			var respData = delta(clientMess, serverMess);
+			responseWith(waiter.res, 200, history.length, respData);
+			console.log(respData);
+			waiter.res.end();
+		});
+	toBeResponded = [];
+	res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
 	res.end();
 }
 
@@ -164,7 +170,6 @@ function getId(u){
 
 function onDataComplete(req, handler) {
 	var message = '';
-	console.log('hello');
 	req.on('data', function(data){
 		message += data.toString();
 	});
@@ -174,6 +179,65 @@ function onDataComplete(req, handler) {
 	});
 }
 
+function delta(oldArr, newArr){
+	var result = [];
+	for(var i = 0; i < oldArr.length; i++){
+		if(!check(oldArr[i],newArr[i]))
+			result.push(newArr[i]);
+	}
+	for(var i = oldArr.length; i < newArr.length; i++)
+		result.push(newArr[i]);
+	return result;
+}
+
+function getMessages(token){
+	var arr = [];
+	for(var i = 0; i < token; i++){
+		if(history[i].method == 'POST')
+			post(arr,history[i]);
+		else if(history[i].method == 'PUT')
+			put(arr,history[i]);
+		else if(history[i].method == 'DELETE')
+			del(arr,history[i]);
+	}
+	return arr;
+}
+
+function post(arr, message){
+	arr.push({
+		name: message.name,
+		text: message.text,
+		date: message.date,
+		id: message.id,
+		status: 'sent'
+	});
+}
+
+function put(arr, message){
+	for(var i = 0; i < arr.length; i++){
+		if(arr[i].id == message.id){
+			arr[i].text = message.text;
+			arr[i].date = message.date;
+			arr[i].status = 'edited';
+			return;
+		}
+	}
+}
+
+function del(arr, message){
+	for(var i = 0; i < arr.length; i++){
+		if(arr[i].id == message.id){
+			arr[i].text = '';
+			arr[i].date = message.date;
+			arr[i].status = 'deleted';
+			return;
+		}
+	}
+}
+
+function check(mess1, mess2){
+	return ((mess1.id == mess2.id) && (mess1.text == mess2.text) && (mess1.date == mess2.date) && (mess1.name == mess2.name) && (mess1.edited == mess2.edited) && (mess1.deleted == mess2.deleted));
+}
 
 server.listen(port, ip);
 server.setTimeout(10000000);

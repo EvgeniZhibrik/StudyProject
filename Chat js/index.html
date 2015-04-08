@@ -9,21 +9,16 @@
 
 	</head>
 
-	<body onload = "run();" onunload="return false">
+	<body>
 		<h1 id = "chatRoom">CHATTING ROOM #1</h1>
 		<form class = "navbar-form" id = "inputForm">
   			<input type = "text" placeholder = "Enter your name" class = "span2" id = "setName"></input>
-  			<button class = "btn btn-primary" id = "button1">Confirm</button>
+        <button id="button1" class="btn btn-primary" type="button">Confirm</button>
   	</form>
-    <div id = "mainForms" class = "container-fluid app-container main" >
-  		<div class = "messages" style="float:left; width:70%;"> 	
+    <div id = "mainForms" class = "container-fluid app-container main">
+  		<div class = "messages" style="width:70%;"> 	
     	</div>
-    	<div class="visitors" style="float:right; width:25%;">
-    		<div class = "user">
-    			<div class = "name">Admin</div>
-    		</div>
-    	</div>
-  	</div>
+    </div>
     <form id = "inputMessForm" class="form-horizontal" >
       <div class="form-group">
         <label for="inputEmail" class="control-label col-xs-2">Type your message: </label>
@@ -31,13 +26,19 @@
           <textarea id="redex"></textarea>
         </div>
       </div>
-      <div class="form-group">
-        <div class="col-xs-offset-2 col-xs-10">
-          <button type="send" class="btn btn-primary" id = "button2">Send</button>
+      <div class = "form-group" id = "send button">
+        <div class = "col-xs-offset-2 col-xs-10">
+          <button id = "button2" class = "btn btn-primary" type = "button">Send</button>
+        </div>
+      </div>
+      <div class = "form-group" id = "edit buttons" style = "display: none">
+        <div class="col-xs-offset-2 col-xs-10" id = "edit buttons">
+          <button id = "button3" class = "btn btn-primary" type = "button">Edit</button>
+          <button id = "button4" class = "btn btn-primary" type = "button">Cancel</button>
         </div>
       </div>
     </form>
-  	<div class="footer text-center">
+    <div class="footer text-center">
       <small>For Exadel © 2015</small>
     </div>
 	</body>

@@ -20,12 +20,12 @@ body{
 }
 
 #mainForms{
-	
 	height: 52%;
 }
 
 .messages{
-	margin-top: 3%;
+	margin-top: 1%;
+	margin-left: 15%;
 	background-color: #F7F6F6;
 	height: 100%;
 	border-style: solid;
@@ -58,30 +58,8 @@ body{
 	padding-left: 10px;
 }
 
-.visitors{
-	margin-top: 3%;
-	background-color: #E2EE79;
-	height: 100%;
-	border-style: solid;
-	border-color: black;
-}
-
-.user{
-	font-family: "Georgia", serif;
-	font-size: 20px;
-	padding-left: 10px;
-}
-
-#headerMessages{
-	margin-left: 5%;
-}
-
-#headerVisitors{
-	margin-left: 2%;
-}
-
 #inputMessForm{
-
+	margin-left: 15%;
 	margin-top: 4%;
 }
 
