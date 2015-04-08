@@ -1,7 +1,7 @@
 'use strict';
 
 var AppState = {
-	mainUrl: 'http://192.168.1.7:31337',
+	mainUrl: 'http://192.168.2.167:31337',
 	token: 0,
 	firstUse: true,
 	messageList: [],
@@ -29,6 +29,7 @@ function restore(){
 			AppState.name = temp2.name;
 		}
 		displayPage();
+		get();
 	}); 
 }
 
@@ -51,7 +52,8 @@ var theMessage = function(text, id) {
 		text: text,
 		date: getDate(),
 		id: id,
-		edited: AppState.editMode
+		edited: AppState.editMode,
+		deleted: false
 	};
 };
 
@@ -86,6 +88,10 @@ function displayPage(){
 			for (var i = 0; i < allMessages.length; i++)
 				if(allMessages[i].attributes['data-task-id'].value == AppState.editMess){
 					inputMessFormText.value = allMessages[i].children[1].innerHTML;
+					var temp2 = document.createElement('div');
+					temp2.innerHTML = '<form class="form-inline">' + allMessages[i].children[1].innerHTML + '<button type="send" class="btn btn-danger" id = "button' + AppState.editMess +'" style = "float: right">Delete</button></form>';
+					allMessages[i].insertBefore(temp2, allMessages[i].children[1]);
+					allMessages[i].removeChild(allMessages[i].getElementsByClassName('text')[0]);
 					break;
 				}
 		}
@@ -98,7 +104,6 @@ function displayPage(){
 			inputMessFormText.value = '';
 		}
 	}
-	get();
 }
 
 function delegateEvent(evtObj) {
@@ -115,6 +120,9 @@ function delegateEvent(evtObj) {
 		&& evtObj.target.parentNode.className == 'message'
 		&& evtObj.target.parentNode.getElementsByClassName('userName')[0].innerHTML == AppState.name)
 		onEditMessButtonClick(evtObj.target.parentNode.attributes['data-task-id'].value);
+	else if(evtObj.type === 'click'
+		&& evtObj.target.className == "btn btn-danger")
+		onDeleteMessButtonClick();
 }
 
 function onSetNameButtonClick(){
@@ -137,6 +145,16 @@ function onEditMessButtonClick(messId){
 	AppState.editMess = messId;
 	store(AppState);
 	displayPage();
+}
+
+function onDeleteMessButtonClick(){
+
+	ajax('DELETE', AppState.mainUrl + '/?id=' + AppState.editMess, null, function(response){
+			get();
+		});
+	AppState.editMode = false;
+	AppState.editMess = '';
+	store(AppState);
 }
 
 function ajax(method, url, data, toReturn) {
@@ -192,7 +210,12 @@ function createAllMessages(){
 function addMessage(message) {
 	var temp = document.createElement('div');
 	var htmlAsText;
-	if(!message.edited){
+	if(message.deleted){
+		htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
+						'<div class="date">deleted: ' + message.date + '</div>' + 
+					'</div>';
+	}
+	else if(!message.edited){
 		htmlAsText = '<div class="message" data-task-id="' + message.id + '">' + 
 						'<div class="userName">' + message.name + '</div>' +
 						'<div class="text">' + message.text + '</div>' +

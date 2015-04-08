@@ -4,7 +4,8 @@ var history = [{
 					"text":"Hi!",
 					"date":"27.03.2015 19:33",
 					"id": "1234567890",
-					"edited": false 
+					"edited": false,
+					"deleted": false
 				}];
 var util = require('util');
 var toBeResponded = [];
@@ -31,7 +32,12 @@ var server = http.createServer(function (req, res) {
 		console.log('method: ' + req.method);
 		return;
 	}
-	else
+	else if(req.method == 'DELETE'){
+		deleteHandler(req,res);
+		console.log('method: ' + req.method);
+		return;
+	}
+	else if(req.method == 'OPTIONS')
 	{
 		res.writeHeader(200, {'Access-Control-Allow-Origin':'*',
 										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
@@ -95,10 +101,36 @@ function putHandler(req, res){
 			console.log(history.slice(i, history.length));
 			waiter.res.end();
 		});
-		res.writeHeader(200, {'Access-Control-Allow-Origin':'*',
-								"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
+		toBeResponded = [];
+		res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
 		res.end();
 	});
+}
+
+function deleteHandler(req,res){
+	console.log('deletehandler started');
+	var id = getId(req.url);
+	console.log('id: ' + id);
+	var i;
+	for(i = 0; i < history.length; i++){
+		if(history[i].id == id){
+			history[i].deleted = true;
+		 	console.log('history: ' + util.inspect(history, { showHidden: true, depth: null }));
+		 	toBeResponded.forEach(function(waiter){
+				var token = waiter.token;
+				console.log('responding waiter. token: ' + token + ' history size: ' + history.length);
+				responseWith(waiter.res, 200, history.length, history.slice(i,history.length));
+				console.log(history.slice(i, history.length));
+				waiter.res.end();
+			});
+			toBeResponded = [];
+			res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
+			res.end();
+			return;
+		}
+	}
+	res.writeHeader(204, {'Access-Control-Allow-Origin':'*'});
+	res.end();
 }
 
 function responseWith(response, statusCode, token, messages){
@@ -120,6 +152,14 @@ function getToken(u) {
 	console.log(parts.query);
 	console.log(parts.query.token);
 	return parts.query.token;
+}
+
+function getId(u){
+	var parts = url.parse(u, true);
+	console.log(u);
+	console.log(parts.query);
+	console.log(parts.query.id);
+	return parts.query.id;	
 }
 
 function onDataComplete(req, handler) {
