@@ -1,7 +1,7 @@
 'use strict';
 
 var AppState = {
-	mainUrl: 'http://192.168.2.167:31337',
+	mainUrl: 'http://192.168.43.200:31337',
 	token: 0,
 	firstUse: true,
 	messageList: [],
@@ -86,7 +86,7 @@ function editModeOn(){
 function editModeOff(){
 	document.getElementById('send button').style.display = 'block';
 	document.getElementById('edit buttons').style.display = 'none';
-	if(AppState.editMess != '')
+	if(document.getElementById('button' + AppState.editMess))
 		document.getElementById('button' + AppState.editMess).style.display = 'none';
 }
 
@@ -149,12 +149,22 @@ function delegateEvent(evtObj) {
 		&& evtObj.target.id == 'button4')
 		onCancelEditButtonClick();
 	else if(evtObj.type === 'click'
-		&& (evtObj.target.parentNode.className == 'message' || evtObj.target.parentNode.parentNode.className == 'message')
-		&& (evtObj.target.parentNode.getElementsByClassName('userName')[0].innerHTML == AppState.name || evtObj.target.parentNode.parentNode.getElementsByClassName('userName')[0].innerHTML == AppState.name))
-		onEditModeButtonClick(evtObj.target.parentNode.id || evtObj.target.parentNode.parentNode.id);
-	else if(evtObj.type === 'click'
 		&& evtObj.target.className == "btn btn-danger")
 		onDeleteMessButtonClick();
+	else if(evtObj.type === 'click'
+		&& isMessageClick(evtObj) != '')
+		onEditModeButtonClick(isMessageClick(evtObj));
+}
+
+function isMessageClick(evtObj){
+	var temp = evtObj.target;
+	while (temp && temp.className != 'message')
+		temp = temp.parentNode;
+	if(temp && temp.className == 'message' && temp.getElementsByClassName('userName')[0].innerHTML == AppState.name )
+		return temp.id;
+	else
+		return '';
+		
 }
 
 function onSetNameButtonClick(){
@@ -162,6 +172,7 @@ function onSetNameButtonClick(){
 	if(newName.value == '')
 		return;
 	AppState.name = newName.value;
+	newName.value = '';
 	AppState.firstUse =false;
 	displayPage();
 } 
@@ -172,6 +183,7 @@ function onSendMessButtonClick(){
 	if(newText.value == '')
 		return;
 	newMess = postMessage(newText.value, uniqueId());
+	newText.value = '';
 	var data = JSON.stringify(newMess);
 	ajax('POST', AppState.mainUrl, data,function(response){
 		console.log('POST succeed');
@@ -184,6 +196,7 @@ function onEditMessButtonClick(){
 	var newText = document.getElementById('redex');
 	var newMess;
 	newMess = putMessage(newText.value, AppState.editMess);
+	newText.value = '';
 	var data = JSON.stringify(newMess);
 	AppState.editMode = false;
 	ajax('PUT', AppState.mainUrl + '/?id=' + newMess.id, data, function(response){
@@ -193,12 +206,17 @@ function onEditMessButtonClick(){
 
 function onCancelEditButtonClick(){
 	AppState.editMode = false;
+	var newText = document.getElementById('redex');
+	newText.value = '';
 	displayPage();
 }
 
 function onEditModeButtonClick(messId){
 	AppState.editMode = true;
 	AppState.editMess = messId;
+	var message = document.getElementById(messId);
+	var text = document.getElementById('redex');
+	text.value = message.getElementsByClassName('text')[0].innerHTML;
 	displayPage();
 }
 
@@ -207,6 +225,8 @@ function onDeleteMessButtonClick(){
 		console.log('DELETE succeed');
 	});
 	AppState.editMode = false;
+	var newText = document.getElementById('redex');
+	newText.value = '';
 	displayPage();
 }
 
