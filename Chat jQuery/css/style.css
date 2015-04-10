@@ -1,0 +1,50 @@
+#chat{
+	margin-top:10%;
+
+}
+
+#messages{
+	border-style: solid;
+	border-color: black;
+	height: 50%;
+	overflow: scroll;
+}
+
+#inputMessForm{
+	margin-top: 2%;
+	width: 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#redex{
+	font-family: "Georgia", serif;
+	height: 5%;
+	resize: none;
+	
+}
+
+#button2{
+	height: 5%;
+}
+
+.name{
+	font-weight: bold;
+	color:blue;
+}
+
+.data{
+	display: block;
+}
+
+.text{
+	display:block;
+}
+
+.editForm{
+	display: none;
+}
+
+.time{
+	color:gray;
+}
