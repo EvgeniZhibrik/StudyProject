@@ -1,7 +1,7 @@
 'use strict';
 
 var AppState = {
-	mainUrl: 'http://192.168.43.200:31337',
+	mainUrl: 'http://192.168.2.167:31337',
 	token: 0,
 	firstUse: true,
 	messageList: [],
@@ -100,7 +100,8 @@ function createAllMessages(){
 	{
 		addMessage(AppState.messageList[i]);
 	}
-	messages.scrollTop = 9999;
+	if(!AppState.editMode)
+		messages.scrollTop = 9999;
 }
 
 function addMessage(message) {

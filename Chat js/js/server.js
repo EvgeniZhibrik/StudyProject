@@ -236,7 +236,7 @@ function del(arr, message){
 }
 
 function check(mess1, mess2){
-	return ((mess1.id == mess2.id) && (mess1.text == mess2.text) && (mess1.date == mess2.date) && (mess1.name == mess2.name) && (mess1.edited == mess2.edited) && (mess1.deleted == mess2.deleted));
+	return ((mess1.id == mess2.id) && (mess1.text == mess2.text) && (mess1.date == mess2.date) && (mess1.name == mess2.name) && (mess1.status == mess2.status));
 }
 
 server.listen(port, ip);
