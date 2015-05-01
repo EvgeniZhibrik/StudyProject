@@ -148,6 +148,10 @@ function responseWith(response, statusCode, token, messages){
 			messages:messages
 			})
 		);
+		console.log(JSON.stringify({
+			token:token,
+			messages:messages
+		}));
 	}
 	response.end();
 }

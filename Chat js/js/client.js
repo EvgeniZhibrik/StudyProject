@@ -1,7 +1,7 @@
 'use strict';
 
 var AppState = {
-	mainUrl: 'http://192.168.2.167:31337',
+	mainUrl: 'http://192.168.0.101:31337',
 	token: 0,
 	firstUse: true,
 	messageList: [],

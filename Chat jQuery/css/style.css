@@ -39,12 +39,22 @@
 
 .text{
 	display:block;
+	overflow: scroll;
 }
 
 .editForm{
-	display: none;
+	resize: none;
+}
+
+.editMessText{
+	resize: none;
+	height: 50px;
 }
 
 .time{
 	color:gray;
+}
+
+.btn-danger{
+	height: 50px;
 }

@@ -8,30 +8,21 @@
 		<link rel = "shortcut icon" href = "pictures/chat-blank-icon.png" type = "picture/png">
     	<script src="js/client.js"></script>
 	</head>
-	<body>
-    	<div class = "container-fluid col-md-4 col-md-offset-4" id = "chat">
+	<body onload = "run();">
+
+    	<div class = "container-fluid col-md-6 col-md-offset-3" id = "chat">
+        <h1 align="center">Hello, </h1>
     		<div class = "row">
     			<form class="form-inline col-md-6 col-md-offset-3" id = "inputNameForm">
   					<div class="form-group">
     					<input type="text" class="form-control" id="InputName" placeholder="Enter your name">
   					</div>
-  					<button type="button" class="btn btn-primary">Confirm</button>
+  					<button type="button" class="btn btn-primary" id="submitName">Confirm</button>
   				</form>
   			</div>
   			<div class="row">
   				<div class = "container-fluid col-md-12" id = "messages">
-  					<div class="message row">
-  						<div class="name col-md-2">Admin</div>
-  						<div class="data col-md-10">
-  							<div class="text col-md-10">For basic styling—light padding and only horizontal dividers—add the base class .table to any . It may seem super redundant, but given the widespread use of tables for other plugins like calendars and date pickers, we've opted to isolate our custom table styles</div>
-  							<div class="time col-md-2">18:05</div>
-  						</div>
-  						<div class="editForm col-md-10 row">
-  							<textarea class="col-md-9"></textarea>
-  							<button type="button" class = "btn btn-danger col-md-3">Delete</button>
-  						</div>
-  						
-  					</div>
+  					
   				</div>
   			</div>
   			<div class="row" id = "inputMessForm">
