@@ -1,7 +1,7 @@
 'use strict';
 
 var AppState = {
-	mainUrl: 'http://192.168.1.3:31337',
+	mainUrl: 'http://192.168.1.11:31337',
 	token: 0,
 	messageList: [],
 	editMess: '',
@@ -9,6 +9,13 @@ var AppState = {
 };
 
 function listen(){
+	$("#InputName").keypress(function(event){
+
+		if(event.which == 13){
+			event.preventDefault();
+			submitNameClick();
+		}
+	});
 	$("#submitName").click(function(){
 		submitNameClick();	
 	});
@@ -23,7 +30,8 @@ function listen(){
 		onDeleteButtonClick();	
 	});
 	$(".editMessText").keypress(function(event){
-		onEditMessKeyPress(event,this);
+		if(event.shiftKey && event.which == 13)
+			onEditMessKeyPress(this);
 	});
 
 }
@@ -65,8 +73,10 @@ function button2Click(){
 
 function onMessageDblclick(event,th){
 	var elem = $(th).parents("div.message");
-	AppState.editMess = elem.attr("id");
-	displayPage();
+	if(elem.children('.name').html()==AppState.name && elem.siblings('.day').html() == $('div.day').last().html()){
+		AppState.editMess = elem.attr("id");
+		displayPage();
+	}
 }
 
 function onDeleteButtonClick(){
@@ -89,9 +99,7 @@ function onDeleteButtonClick(){
 	displayPage();
 }
 
-function onEditMessKeyPress(event,th){
-	if(event.which == 13)
-	{
+function onEditMessKeyPress(th){
 		var newText = $(th).val();
 		var newMess = putMessage(newText, AppState.editMess);
 		$.ajax({
@@ -111,17 +119,6 @@ function onEditMessKeyPress(event,th){
 			}
 		});
 		AppState.editMess = '';
-			/*var mess = $(this).parents(".message");
-			mess.find(".text").val(newText);
-			mess.find(".data").show();
-			mess.find(".editForm").hide();
-			newText.value = '';
-			var data = JSON.stringify(newMess);
-			AppState.editMode = false;
-			ajax('PUT', AppState.mainUrl + '/?id=' + newMess.id, data, function(response){
-				console.log('PUT succeed');
-			});*/
-	}
 }
 
 function run(){
@@ -192,16 +189,27 @@ function createAllMessages(){
 
 function addMessage(message) {
 	var newMess;
+	var time = new Date(message.date);
+	var date = time.toDateString();
+	var strTime = time.getHours() + ':';
+	if(time.getMinutes()<10)
+		strTime += "0";
+	strTime += time.getMinutes();
+	var prevDate = $('div.day').last().html();
+	if(prevDate != date){
+		var newDate = $('<div class = "dayChat col-md-12"><div class = "day col-md-12">' + date + '</div></div>');
+		$('#messages').append(newDate);
+	}
 	if(message.status == 'deleted'){
 		newMess = $('<div class="message row" id="' + message.id + '">' + 
 		'<div class="name col-md-2">' + message.name + '</div><div class="data col-md-10"><div class="text col-md-10">deleted</div><div class="time col-md-2">' +
-						message.date + '</div></div></div>');
+						strTime + '</div></div></div>');
 	}
 	else /*if(message.status == 'sent')*/{
 		newMess = $('<div class="message row" id="' + message.id + '"><div class="name col-md-2">' +
-						message.name + '</div><div class="data col-md-10"><div class="text col-md-10">' +
-						message.text + '</div><div class="time col-md-2">' +
-						message.date + '</div></div><div class="editForm col-md-10 row"><textarea class="editMessText col-md-9">' +
+						message.name + '</div><div class="data col-md-10"><div class="text col-md-10"><pre>' +
+						message.text + '</pre></div><div class="time col-md-2">' +
+						strTime + '</div></div><div class="editForm col-md-10 row"><textarea class="editMessText col-md-9">' +
 						message.text + '</textarea><button type="button" class = "btn btn-danger col-md-3">Delete</button></div></div>');
 		if(message.id == AppState.editMess){
 			newMess.children(".data").hide();
@@ -212,7 +220,7 @@ function addMessage(message) {
 			newMess.children(".editForm").hide();
 		}
 	}
-	$('#messages').append(newMess);
+	$('div.dayChat').last().append(newMess);
 }
 
 
