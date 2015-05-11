@@ -1,11 +1,12 @@
 'use strict';
 
 var AppState = {
-	mainUrl: 'http://192.168.0.101:31337',
+	mainUrl: 'http://192.168.2.97:31337',
 	token: 0,
 	messageList: [],
 	editMess: '',
-	name: ''
+	name: '',
+	serverStatus: true
 };
 
 function listen(){
@@ -147,12 +148,21 @@ function restore(){
 		type: 'GET',
 		dataType: "json",
 		success: function(incomingObj){
+			AppState.serverStatus = true;
 			onRespond(incomingObj);	
 		},
 		error: function(xhr, status, errorThrown){
-			alert( "Sorry, there was a problem on get!" );
+			if(AppState.serverStatus){
+				alert( "Sorry, there was a problem on get!" );
+				AppState.serverStatus = false;
+				AppState.messageList = [];
+				AppState.token = 0;
+			}
+
         	console.log( "Error: " + errorThrown );
         	console.log( "Status: " + status );
+        	displayPage();
+			restore();
 		},
 		complete: function(){
 			console.log("GET complete!");
@@ -172,6 +182,14 @@ function displayPage(){
 		$("h1").hide();
 		$("#messages").hide();
 		$("#inputMessForm").hide();
+	}
+	if(AppState.serverStatus){
+		$("#serverOK").show();
+		$("#serverNotOK").hide();
+	}
+	else{
+		$("#serverOK").hide();
+		$("#serverNotOK").show();
 	}
 	listen();
 }

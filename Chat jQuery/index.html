@@ -3,31 +3,44 @@
     	<meta charset="utf-8">
     	<title>jQuery chat</title>
     	<script src="jQuery/jquery-1.11.2.js"></script>
-    	<link href = "css/style.css" rel = "stylesheet">
-    	<link href = "bootstrap/css/bootstrap.css" rel = "stylesheet">
+      <link href = "bootstrap/css/bootstrap.css" rel = "stylesheet">
+    	<link href = "css/style.css" rel = "stylesheet" type = "text/css">
+    	
 		<link rel = "shortcut icon" href = "pictures/chat-blank-icon.png" type = "picture/png">
     	<script src="js/client.js"></script>
 	</head>
 	<body onload = "run();">
-    <img src = "pictures/background.png" id = "bg"></img> 
-    <div class = "container-fluid col-md-6 col-md-offset-1" id = "chat">
-      <h1 align="center">Hello, </h1>
-    	<div class = "row">
-    		<form class="form-inline col-md-6 col-md-offset-3" id = "inputNameForm">
-  				<div class="form-group">
-    				<input type="text" class="form-control" id="InputName" placeholder="Enter your name">
-  				</div>
-  				<button type="button" class="btn btn-primary" id="submitName">Confirm</button>
-  			</form>
-  		</div>
-  		<div class="row">
-  			<div class = "container-fluid col-md-12" id = "messages">
-  			</div>
-  		</div>
-  		<div class="row" id = "inputMessForm">
-  			<textarea class = "col-md-10" id = "redex"></textarea>
-  			<button type="button" class="btn btn-primary col-md-2" id = "button2" >Confirm</button>
-   		</div>
+    <img src="pictures/background.png" id = "bg"></img>
+    <div class = "container-fluid"> 
+      <div class = "row">
+        <div class = "container col-xs-6 col-xs-offset-1" id = "chat">
+          <h1 align="center">Hello, </h1>
+          <div class = "row"  style = "height:10%; min-height: 60px;">
+    		    <form class="col-xs-8 col-xs-offset-2" id = "inputNameForm">
+  				    <input type="text" class="col-xs-7" id="InputName" placeholder="Enter your name">
+  				    <button type="button" class="btn btn-primary col-xs-4 col-xs-offset-1" id="submitName">Confirm</button>
+            </form>
+  		    </div>
+  		    <div class="row" style = "height:50%; min-height: 200px;">
+            <div class = "container-fluid" id = "messages">
+            
+            </div>
+  		    </div>
+  		    <div class="row" id = "inputMessForm" style = "height: 80px;">
+            <textarea class = "col-xs-9" id = "redex"></textarea>
+            <button type="button" class="btn btn-primary col-xs-3" id = "button2" >Confirm</button>
+          </div>
+        </div>
+        <div class = "container col-xs-3 col-xs-offset-1" id = "status">
+          <div class = "col-xs-7" id = "statusText">
+            Server status:
+          </div> 
+          <div class = "col-xs-5">
+            <img src = "pictures/serverOK.png" id = "serverOK" class ="img-rounded statusPict"></img>
+            <img src = "pictures/serverNotOK.png" id = "serverNotOK" class = "img-rounded statusPict"></img>
+          </div>
+        </div> 
+      </div>
     </div>
 	</body>
 </html>
