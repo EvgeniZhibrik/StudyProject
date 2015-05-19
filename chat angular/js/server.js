@@ -44,7 +44,8 @@ var server = http.createServer(function (req, res) {
 	else if(req.method == 'OPTIONS')
 	{
 		res.writeHeader(200, {'Access-Control-Allow-Origin':'*',
-										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS"});
+										"Access-Control-Allow-Methods":"PUT, DELETE, POST, GET, OPTIONS",
+										'Access-Control-Allow-Headers': 'Content-Type'});
 		res.end();
 		console.log('method: ' + req.method);
 		return;
@@ -88,7 +89,7 @@ function postHandler(req, res) {
 			waiter.res.end();
 		});
 		toBeResponded = [];
-		res.writeHeader(200, {'Access-Control-Allow-Origin':'*'});
+		res.writeHeader(200, {'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers': 'Content-Type, x-xsrf-token'});
 		res.end();
 	});
 }
