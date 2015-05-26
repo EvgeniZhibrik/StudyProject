@@ -1,3 +1,11 @@
-Name: {{elem.name}}
-Date: {{elem.date}}
-Text: {{elem.text}}
+<div class="message row" id="{{message.id}}" >
+	<div class="name col-md-2">{{message.name}}</div>
+	<div class="data col-md-10" ng-hide = "editMode" ng-click = "edit()">
+		<div class="text col-md-10"><pre>{{message.text}}</pre></div>
+		<div class="time col-md-2">{{message.date}}</div>
+	</div>
+	<div class="editForm col-md-10 row ng-hide" ng-show = "editMode">
+		<textarea class="editMessText col-md-9" ng-model = "edText" ng-keypress = "editing($event)"></textarea>
+		<button type="button" class = "btn btn-danger col-md-3" ng-click = "deleting()">Delete</button>
+	</div>
+</div>

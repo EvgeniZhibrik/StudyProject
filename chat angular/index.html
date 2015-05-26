@@ -22,12 +22,12 @@
       <div class="row" >
         <div class = "container-fluid" id = "messages">
           <div ng-repeat = "elem in messageList">
-            <msg-dir ></msg-dir>
+            <msg-dir ng-attr-message = "{{elem}}" on-manipulate = "putOrDelete(id, oper, newtxt)" ng-attr-name = "{{name}}"></msg-dir>
           </div>
         </div>
       </div>
       <div class="row" id = "inputMessForm">
-        <textarea class = "col-xs-9" id = "redex" ng-model = "newText"></textarea>
+        <textarea class = "col-xs-9" id = "redex" ng-model = "newText" ng-keypress = "onSendMessKeypress(newText, $event)"></textarea>
         <button type="button" class="btn btn-primary col-xs-3" id = "button2" ng-click = "onSendMessClick(newText)">Confirm</button>
       </div>
     </div>

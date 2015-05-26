@@ -4,7 +4,7 @@ var chatAngular = angular.module('chatAngular', [
 ]);
 
 chatAngular.value('AppState', {
-		mainUrl: 'http://192.168.1.2:31337',
+		mainUrl: 'http://192.168.1.6:31337',
 		token: 0,
 		messageList: [{
 			name: "kaktus",

@@ -232,7 +232,7 @@ function put(arr, message){
 function del(arr, message){
 	for(var i = 0; i < arr.length; i++){
 		if(arr[i].id == message.id){
-			arr[i].text = '';
+			arr[i].text = 'deleted';
 			arr[i].date = message.date;
 			arr[i].status = 'deleted';
 			return;

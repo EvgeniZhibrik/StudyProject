@@ -1,6 +1,5 @@
 var chatControllers = angular.module('chatControllers', []);
 
-
 chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
   function($scope, $http, appState) {
   	
@@ -25,6 +24,12 @@ chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
   		error(function(data, status, headers, config) {
     
     	});
+	}
+
+	$scope.onSendMessKeypress = function(newText, event){
+		if(event.shiftKey && event.which == 13){
+			$scope.onSendMessClick(newText);
+		}
 	}
 
 	getMessages = function(){
@@ -52,6 +57,26 @@ chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
 		getMessages();
 	}
 
+	$scope.putOrDelete = function(id, oper, newtxt){
+		if(oper == 'delete'){
+			$http.delete(appState.mainUrl + '/?id=' + id).
+			success(function(data, status, headers, config){
+				console.log("delete succeed");
+			}).
+			error(function(data, status, headers, config) {
+    	
+    		});
+		}
+		else{
+			$http.put(appState.mainUrl, putMessage(newtxt, id)).
+			success(function(data, status, headers, config){
+				console.log("put succeed");
+			}).
+			error(function(data, status, headers, config) {
+    	
+    		});
+		}
+	}
 
 	var postMessage = function(text, id) {
 		return {
@@ -60,6 +85,15 @@ chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
 			text: text,
 			date: getDate(),
 			id: id
+		};
+	};
+
+	var putMessage = function(text, id){
+		return {
+			method: 'PUT',
+			text: text,
+			id: id,
+			date: getDate()
 		};
 	};
 
