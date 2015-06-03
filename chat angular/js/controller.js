@@ -1,7 +1,7 @@
 var chatControllers = angular.module('chatControllers', []);
 
-chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
-  function($scope, $http, appState) {
+chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState', 'messageModel',
+  function($scope, $http, appState, messageModel) {
   	
   	$scope.submitNameClick = function(userName)
 	{
@@ -48,10 +48,23 @@ chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
 			for (var i = 0; i < $scope.messageList.length; i++){
 				if($scope.messageList[i].id == message.id){
 					$scope.messageList[i] = message;
+					$scope.modelList[i].message = message;
 					return;
 				}
 			}
 			$scope.messageList.push(message);
+			var temp = new messageModel($scope.name, message);
+			temp.edit = ( function(id){
+				return function(newtxt){
+					$scope.putOrDelete(id, 'put' ,newtxt);
+				};
+			}) (message.id);
+			temp.del = ( function(id){
+				return function(){
+					$scope.putOrDelete(id, 'delete' , '');
+				};
+			}) (message.id);
+			$scope.modelList.push(temp);
 		});
 		$scope.token = incomingObj.token;
 		getMessages();
@@ -111,5 +124,6 @@ chatControllers.controller('chatCtrl', ['$scope', '$http', 'appState',
 
 
   	$scope.messageList = [];
+  	$scope.modelList = [];
   	$scope.token = 0;
   }]);

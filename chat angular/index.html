@@ -22,7 +22,7 @@
       <div class="row" >
         <div class = "container-fluid" id = "messages">
           <div ng-repeat = "elem in messageList">
-            <msg-dir ng-attr-message = "{{elem}}" on-manipulate = "putOrDelete(id, oper, newtxt)" ng-attr-name = "{{name}}"></msg-dir>
+            <msg-dir model = "modelList[$index]"></msg-dir>
           </div>
         </div>
       </div>
